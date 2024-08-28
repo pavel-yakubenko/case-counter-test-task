@@ -4,6 +4,7 @@ public inherited sharing class AccountsTriggerHandler {
     }
 
     private static void countCases() {
+        // get accounts with related cases
         Set<Id> accountIds = Trigger.newMap.keySet();
         List<Account> accountsWithCases = [
             SELECT 
@@ -12,6 +13,7 @@ public inherited sharing class AccountsTriggerHandler {
             FROM Account
             WHERE Id IN :accountIds
         ];
+        // calc total cases count for each account
         Map<Id,Account> accountsWithCasesById = new Map<Id,Account>(accountsWithCases);
         for (Account record : (List<Account>)Trigger.new) {
             Account accountWithCases = accountsWithCasesById.get(record.Id);

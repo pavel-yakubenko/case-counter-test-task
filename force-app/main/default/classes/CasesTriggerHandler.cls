@@ -14,6 +14,7 @@ public inherited sharing class CasesTriggerHandler {
     private static void updateCasesCountOnAccounts() {
         List<Account> accounts = getAccounts();
         if (!accounts.isEmpty()) {
+            // update accounts to recalc total cases count
             update accounts;
         }
     } 
@@ -29,6 +30,7 @@ public inherited sharing class CasesTriggerHandler {
         return new List<Account>();
     }
 
+    // get all related accounts, when cases are inserted or updated
     private static List<Account> getAccounts(List<Case> records) {
         Set<Account> accounts = new Set<Account>();
         for (Case record : records) {
@@ -40,6 +42,7 @@ public inherited sharing class CasesTriggerHandler {
         return new List<Account>(accounts);
     }
 
+    // get related accounts for cases with selected fields changed, when cases are updated
     private static List<Account> getAccounts(List<Case> records, Map<Id, SObject> oldRecordsMap) {
         Set<Account> accounts = new Set<Account>();
         for (Case record : records) {
