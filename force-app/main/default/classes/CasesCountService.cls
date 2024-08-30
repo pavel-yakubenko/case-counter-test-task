@@ -1,29 +1,46 @@
 public inherited sharing class CasesCountService {
     public static void count(List<Account> accounts) {
-        // get accounts with related cases
+        // get accounts with cases calculated
+        Map<Id,Account> accountsWithCasesById = getAccountsWithCasesMap(accounts);
+        // update records
+        for (Account accountRecord : accounts) {
+            Account accountWithCases = accountsWithCasesById.get(accountRecord.Id);
+            if (accountWithCases == null) {
+                accountRecord.TotalOpenCases__c = 0;
+                accountRecord.TotalClosedCases__c = 0;
+            } else {
+                accountRecord.TotalOpenCases__c = accountWithCases.TotalOpenCases__c;
+                accountRecord.TotalClosedCases__c = accountWithCases.TotalClosedCases__c;
+            }
+        }
+    }
+
+    private static Map<Id, Account> getAccountsWithCasesMap(List<Account> accounts) {
+        // get all cases related to accounts
         Set<Id> accountIds = new Map<Id, Account>(accounts).keySet();
-        List<Account> accountsWithCases = [
-            SELECT 
-                Id,
-                (SELECT Id, IsClosed FROM Cases)
-            FROM Account
-            WHERE Id IN :accountIds
+        List<Case> cases = [
+            SELECT Id, AccountId, IsClosed
+            FROM Case
+            WHERE AccountId IN :accountIds
         ];
         // calc total cases count for each account
-        Map<Id,Account> accountsWithCasesById = new Map<Id,Account>(accountsWithCases);
-        for (Account record : accounts) {
-            Account accountWithCases = accountsWithCasesById.get(record.Id);
-            Decimal totalOpenCases = 0;
-            Decimal totalClosedCases = 0;
-            for (Case caseRecord : accountWithCases.Cases) {
-                if (caseRecord.isClosed) {
-                    totalClosedCases++;
-                } else {
-                    totalOpenCases++;
-                }
+        Map<Id,Account> accountsWithCasesById = new Map<Id,Account>();
+        for (Case caseRecord : cases) {
+            Account accountRecord = accountsWithCasesById.get(caseRecord.AccountId);
+            if (accountRecord == null) {
+                accountRecord = new Account(
+                    Id = caseRecord.AccountId,
+                    TotalOpenCases__c = 0,
+                    TotalClosedCases__c = 0
+                );
+                accountsWithCasesById.put(accountRecord.Id, accountRecord);
             }
-            record.TotalOpenCases__c = totalOpenCases;
-            record.TotalClosedCases__c = totalClosedCases;
+            if (caseRecord.IsClosed) {
+                accountRecord.TotalClosedCases__c++;
+            } else {
+                accountRecord.TotalOpenCases__c++;
+            }
         }
+        return accountsWithCasesById;
     }
 }
