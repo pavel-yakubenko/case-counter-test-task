@@ -11,16 +11,23 @@ public inherited sharing class CasesTriggerHandler {
         updateCasesCountOnAccounts();
     }
 
+    public static void onAfterUndelete() {
+        updateCasesCountOnAccounts();
+    }
+
     private static void updateCasesCountOnAccounts() {
         List<Account> accounts = getAccounts();
         if (!accounts.isEmpty()) {
-            // update accounts to recalc total cases count
+            // recalc total cases count
+            CasesCountService.count(accounts);
             update accounts;
         }
     } 
 
     private static List<Account> getAccounts() {
         if (Trigger.isInsert) {
+            return getAccounts(Trigger.new);
+        } else if (Trigger.isUndelete) {
             return getAccounts(Trigger.new);
         } else if (Trigger.isDelete) {
             return getAccounts(Trigger.old);

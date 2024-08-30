@@ -1,11 +1,7 @@
-public inherited sharing class AccountsTriggerHandler {
-    public static void onBeforeUpdate() {
-        countCases();
-    }
-
-    private static void countCases() {
+public inherited sharing class CasesCountService {
+    public static void count(List<Account> accounts) {
         // get accounts with related cases
-        Set<Id> accountIds = Trigger.newMap.keySet();
+        Set<Id> accountIds = new Map<Id, Account>(accounts).keySet();
         List<Account> accountsWithCases = [
             SELECT 
                 Id,
@@ -15,7 +11,7 @@ public inherited sharing class AccountsTriggerHandler {
         ];
         // calc total cases count for each account
         Map<Id,Account> accountsWithCasesById = new Map<Id,Account>(accountsWithCases);
-        for (Account record : (List<Account>)Trigger.new) {
+        for (Account record : accounts) {
             Account accountWithCases = accountsWithCasesById.get(record.Id);
             Decimal totalOpenCases = 0;
             Decimal totalClosedCases = 0;

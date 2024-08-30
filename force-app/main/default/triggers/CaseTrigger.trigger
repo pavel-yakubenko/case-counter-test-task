@@ -1,4 +1,4 @@
-trigger Cases on Case (after insert, after update, after delete) {
+trigger CaseTrigger on Case (after insert, after update, after delete, after undelete) {
     if (Trigger.isAfter) {
         if (Trigger.isInsert) {
             CasesTriggerHandler.onAfterInsert();
@@ -6,6 +6,8 @@ trigger Cases on Case (after insert, after update, after delete) {
             CasesTriggerHandler.onAfterUpdate();
         } else if (Trigger.isDelete) {
             CasesTriggerHandler.onAfterDelete();
+        } else if (Trigger.isUndelete) {
+            CasesTriggerHandler.onAfterUndelete();
         }
     }    
 }

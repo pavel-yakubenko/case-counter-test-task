@@ -1,5 +1,5 @@
 @isTest
-private class AccountsTriggerHandlerTest {
+private class CasesCountServiceTest {
 
     @TestSetup
     static void makeData(){
@@ -116,6 +116,35 @@ private class AccountsTriggerHandlerTest {
         for (Account acc : accountRecordsUpdated) {
             System.AssertEquals(newCasesCount, acc.TotalOpenCases__c, 'Incorrect total open cases count');
             System.AssertEquals(0, acc.TotalClosedCases__c, 'Incorrect total closed cases count');
+        }
+    }
+
+    @isTest
+    static void countCasesOnUndelete() {
+        Integer newCasesCount = 100;
+        Integer closedCasesCount = 50;
+        List<Account> accountRecords = [SELECT Id FROM Account];
+        List<Case> caseRecords = new List<Case>();
+        caseRecords.addAll(getCases(accountRecords, newCasesCount, 'New'));
+        caseRecords.addAll(getCases(accountRecords, closedCasesCount, 'Closed'));
+        insert caseRecords;
+        delete caseRecords;
+        
+        List<Case> casesToRestore = [SELECT Id FROM Case WHERE IsDeleted = true ALL ROWS];
+
+        Test.startTest();
+        undelete casesToRestore;
+        Test.stopTest();
+
+        List<Account> accountRecordsUpdated = [
+            SELECT Id, TotalOpenCases__c, TotalClosedCases__c 
+            FROM Account
+            WHERE Id IN :accountRecords
+            ORDER BY Id Desc
+        ];
+        for (Account acc : accountRecordsUpdated) {
+            System.AssertEquals(newCasesCount, acc.TotalOpenCases__c, 'Incorrect total open cases count');
+            System.AssertEquals(closedCasesCount, acc.TotalClosedCases__c, 'Incorrect total closed cases count');
         }
     }
 
